@@ -1,0 +1,210 @@
+<!DOCTYPE HTML>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  
+  <title>BERT系列（一）——demo运行 | 西溪雷神</title>
+  <meta name="author" content="Jiangping Lei">
+  
+  <meta name="description" content="谷歌推出的Bert，最近有多火，估计做自然语言处理的都知道。据称在SQuAD等11项任务当中达到了state of the art。bert的原理可参考论文，或者网上其他人翻译的资料。谷歌已经在github上开源了代码，相信每一个从事NLP的都应该和我一样摩拳擦掌，迫不及待地想要学习它了吧。
+就我个人而言学习一个开源项目，第一步是安装，第二步是跑下demo，第三步才是阅读源码。安装bert简单，直接github上拉下来就可以了，跑demo其实也不难，参照README.md一步步操作就行了，但是经我实操过后，发现里面有个小坑，所以用这篇文章记录下来，供读者参考。
+闲言少叙，书归正传。本次介绍的demo只有两个，一个是基于MRPC(Microsoft Research Paraphrase Corpus )的句子对分类任务，一个是基于SQuAD语料的阅读理解任务。run demo分为以下几步：">
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  <meta property="og:title" content="BERT系列（一）——demo运行"/>
+  <meta property="og:site_name" content="西溪雷神"/>
+
+  
+    <meta property="og:image" content=""/>
+  
+
+  <link href="/favicon.png" rel="icon">
+  <link rel="alternate" href="/atom.xml" title="西溪雷神" type="application/atom+xml">
+  <link rel="stylesheet" href="/css/style.css" media="screen" type="text/css">
+  <!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+  
+
+<meta name="generator" content="Hexo 4.2.0"></head>
+
+
+<body>
+  <header id="header" class="inner"><div class="alignleft">
+  <h1><a href="/">西溪雷神</a></h1>
+  <h2><a href="/"></a></h2>
+</div>
+<nav id="main-nav" class="alignright">
+  <ul>
+    
+      <li><a href="/">Home</a></li>
+    
+      <li><a href="/archives">Archives</a></li>
+    
+  </ul>
+  <div class="clearfix"></div>
+</nav>
+<div class="clearfix"></div>
+</header>
+  <div id="content" class="inner">
+    <div id="main-col" class="alignleft"><div id="wrapper"><article id="post-BERT系列（一）——demo运行" class="h-entry post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  
+  <div class="post-content">
+    <header>
+      
+        <div class="icon"></div>
+        <time class="dt-published" datetime="2018-12-18T05:06:26.000Z"><a href="/BERT系列（一）——demo运行/">2018-12-18</a></time>
+      
+      
+  
+    <h1 class="p-name title" itemprop="headline name">BERT系列（一）——demo运行</h1>
+  
+
+    </header>
+    <div class="e-content entry" itemprop="articleBody">
+      
+        <p>谷歌推出的Bert，最近有多火，估计做自然语言处理的都知道。据称在SQuAD等11项任务当中达到了state of the art。bert的原理可参考<a href="https://arxiv.org/abs/1810.04805" target="_blank" rel="noopener">论文</a>，或者网上其他人翻译的资料。谷歌已经在github上<a href="https://github.com/google-research/bert" target="_blank" rel="noopener">开源了代码</a>，相信每一个从事NLP的都应该和我一样摩拳擦掌，迫不及待地想要学习它了吧。</p>
+<p>就我个人而言学习一个开源项目，第一步是安装，第二步是跑下demo，第三步才是阅读源码。安装bert简单，直接github上拉下来就可以了，跑demo其实也不难，参照README.md一步步操作就行了，但是经我实操过后，发现里面有个小坑，所以用这篇文章记录下来，供读者参考。</p>
+<p>闲言少叙，书归正传。本次介绍的demo只有两个，一个是基于MRPC(Microsoft Research Paraphrase Corpus )的句子对分类任务，一个是基于SQuAD语料的阅读理解任务。run demo分为以下几步：</p>
+<a id="more"></a>
+
+<h1 id="1、下载bert源码"><a href="#1、下载bert源码" class="headerlink" title="1、下载bert源码"></a>1、下载bert源码</h1><p>这没什么好说的，直接clone</p>
+<p>git clone <a href="https://github.com/google-research/bert.git" target="_blank" rel="noopener">https://github.com/google-research/bert.git</a></p>
+<h1 id="2、下载预训练模型"><a href="#2、下载预训练模型" class="headerlink" title="2、下载预训练模型"></a>2、下载预训练模型</h1><p><a href="https://storage.googleapis.com/bert_models/2018_10_18/uncased_L-12_H-768_A-12.zip" target="_blank" rel="noopener"><code>BERT-Base, Uncased</code></a></p>
+<p><img src="https://upload-images.jianshu.io/upload_images/14927967-37c041cb104cbdac.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="可选预训练模型.png"></p>
+<p>为什么选择<code>BERT-Base, Uncased</code>这个模型呢？原因有三：1、训练语料为英文，所以不选择中文或者多语种；2、设备条件有限，如果您的显卡内存小于16个G，那就请乖乖选择base,不要折腾large了；3、cased表示区分大小写，uncased表示不区分大小写。除非你明确知道你的任务对大小写敏感（比如命名实体识别、词性标注等）那么通常情况下uncased效果更好。</p>
+<h1 id="3、下载训练数据："><a href="#3、下载训练数据：" class="headerlink" title="3、下载训练数据："></a>3、下载训练数据：</h1><h2 id="（1）下载MRPC语料："><a href="#（1）下载MRPC语料：" class="headerlink" title="（1）下载MRPC语料："></a>（1）下载MRPC语料：</h2><p>官网上指定的方式是通过跑脚本<a href="https://gist.github.com/W4ngatang/60c2bdb54d156a41194446737ce03e2e" target="_blank" rel="noopener">download_glue_data.py</a>来下载 <a href="https://gluebenchmark.com/tasks" target="_blank" rel="noopener">GLUE data</a> 。指定数据存放地址为：glue_data， 下载任务为：MRPC，执行（本篇中所有python3的命令同样适用于python）：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">python3 download_glue_data.py --data_dir glue_data --tasks MRPC</span><br></pre></td></tr></table></figure>
+<p>执行后发现下载失败，究其原因是下面这两个链接访问不上，几天后试了一次又能下载了，可能对方服务端不稳定。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">MRPC_TRAIN &#x3D; &#39;https:&#x2F;&#x2F;s3.amazonaws.com&#x2F;senteval&#x2F;senteval_data&#x2F;msr_paraphrase_train.txt&#39;</span><br><span class="line">MRPC_TEST &#x3D; &#39;https:&#x2F;&#x2F;s3.amazonaws.com&#x2F;senteval&#x2F;senteval_data&#x2F;msr_paraphrase_test.txt&#39;</span><br></pre></td></tr></table></figure>
+<p>如果不能下载，可以参考我当时的做法：<br>1、手动下载dev_ids.tsv映射表保存在glue_data/MRPC文件夹下</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&quot;MRPC&quot;:&#39;https:&#x2F;&#x2F;firebasestorage.googleapis.com&#x2F;v0&#x2F;b&#x2F;mtl-sentence-representations.appspot.com&#x2F;o&#x2F;data%2Fmrpc_dev_ids.tsv?alt&#x3D;media&amp;token&#x3D;ec5c0836-31d5-48f4-b431-7480817f1adc&#39;,</span><br></pre></td></tr></table></figure>
+<p>2、因为 <a href="https://gluebenchmark.com/tasks" target="_blank" rel="noopener">GLUE data</a>官网也访问不了，所以只能去微软官网下载：<a href="https://www.microsoft.com/en-ca/download/details.aspx?id=52398" target="_blank" rel="noopener">https://www.microsoft.com/en-ca/download/details.aspx?id=52398</a><br>将 msr_paraphrase_test.txt， msr_paraphrase_train.txt两个解压后的文件放在mrpc_ori_corpus文件夹下</p>
+<p>3、注释掉脚本download_glue_data.py里下载dev_ids.tsv文件的语句（如果你的服务器能下载可以不注释，使用代码下载不必手动下载）：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">65 # urllib.request.urlretrieve(TASK2PATH[&quot;MRPC&quot;], os.path.join(mrpc_dir, &quot;dev_ids.tsv&quot;))</span><br></pre></td></tr></table></figure>
+<p>执行</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">python3 download_glue_data.py --data_dir glue_data --tasks MRPC --path_to_mrpc mrpc_ori_corpus</span><br></pre></td></tr></table></figure>
+<p>如果在glue_data/MRPC文件下出现 dev.tsv，test.tsv，train.tsv这三个文件，说明MRPC语料下载成功。</p>
+<h2 id="（2）下载SQuAD语料："><a href="#（2）下载SQuAD语料：" class="headerlink" title="（2）下载SQuAD语料："></a>（2）下载SQuAD语料：</h2><p>基本上没什么波折，可以使用下面三个链接直接下载，放置于$SQUAD_DIR路径下</p>
+<ul>
+<li><a href="https://rajpurkar.github.io/SQuAD-explorer/dataset/train-v1.1.json" target="_blank" rel="noopener">train-v1.1.json</a></li>
+<li><a href="https://rajpurkar.github.io/SQuAD-explorer/dataset/dev-v1.1.json" target="_blank" rel="noopener">dev-v1.1.json</a></li>
+<li><a href="https://github.com/allenai/bi-att-flow/blob/master/squad/evaluate-v1.1.py" target="_blank" rel="noopener">evaluate-v1.1.py</a></li>
+</ul>
+<h1 id="4、run-demo"><a href="#4、run-demo" class="headerlink" title="4、run demo"></a>4、run demo</h1><h2 id="1-基于MRPC语料的句子对分类任务"><a href="#1-基于MRPC语料的句子对分类任务" class="headerlink" title="(1) 基于MRPC语料的句子对分类任务"></a>(1) 基于MRPC语料的句子对分类任务</h2><h3 id="训练："><a href="#训练：" class="headerlink" title="训练："></a>训练：</h3><p>设置环境变量，指定预训练模型文件和语料地址</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">export BERT_BASE_DIR&#x3D;&#x2F;path&#x2F;to&#x2F;bert&#x2F;uncased_L-12_H-768_A-12</span><br><span class="line">export GLUE_DIR&#x3D;&#x2F;path&#x2F;to&#x2F;glue_data</span><br></pre></td></tr></table></figure>
+<p>在bert源码文件里执行run_classifier.py，基于预训练模型进行fine-tune</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">python run_classifier.py \</span><br><span class="line">  --task_name&#x3D;MRPC \</span><br><span class="line">  --do_train&#x3D;true \</span><br><span class="line">  --do_eval&#x3D;true \</span><br><span class="line">  --data_dir&#x3D;$GLUE_DIR&#x2F;MRPC \</span><br><span class="line">  --vocab_file&#x3D;$BERT_BASE_DIR&#x2F;vocab.txt \</span><br><span class="line">  --bert_config_file&#x3D;$BERT_BASE_DIR&#x2F;bert_config.json \</span><br><span class="line">  --init_checkpoint&#x3D;$BERT_BASE_DIR&#x2F;bert_model.ckpt \</span><br><span class="line">  --max_seq_length&#x3D;128 \</span><br><span class="line">  --train_batch_size&#x3D;32 \</span><br><span class="line">  --learning_rate&#x3D;2e-5 \</span><br><span class="line">  --num_train_epochs&#x3D;3.0 \</span><br><span class="line">  --output_dir&#x3D;&#x2F;tmp&#x2F;mrpc_output&#x2F;</span><br></pre></td></tr></table></figure>
+<p>模型保存在output_dir， 验证结果为：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">***** Eval results *****</span><br><span class="line">  eval_accuracy &#x3D; 0.845588</span><br><span class="line">  eval_loss &#x3D; 0.505248</span><br><span class="line">  global_step &#x3D; 343</span><br><span class="line">  loss &#x3D; 0.505248</span><br></pre></td></tr></table></figure>
+
+<h3 id="预测："><a href="#预测：" class="headerlink" title="预测："></a>预测：</h3><p>指定fine-tune之后模型文件所在地址</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">export TRAINED_CLASSIFIER&#x3D;&#x2F;path&#x2F;to&#x2F;fine&#x2F;tuned&#x2F;classifier</span><br></pre></td></tr></table></figure>
+<p>执行以下语句完成预测任务，预测结果输出在output_dir文件夹中</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">python run_classifier.py \</span><br><span class="line">  --task_name&#x3D;MRPC \</span><br><span class="line">  --do_predict&#x3D;true \</span><br><span class="line">  --data_dir&#x3D;$GLUE_DIR&#x2F;MRPC \</span><br><span class="line">  --vocab_file&#x3D;$BERT_BASE_DIR&#x2F;vocab.txt \</span><br><span class="line">  --bert_config_file&#x3D;$BERT_BASE_DIR&#x2F;bert_config.json \</span><br><span class="line">  --init_checkpoint&#x3D;$TRAINED_CLASSIFIER \</span><br><span class="line">  --max_seq_length&#x3D;128 \</span><br><span class="line">  --output_dir&#x3D;&#x2F;tmp&#x2F;mrpc_output&#x2F;</span><br></pre></td></tr></table></figure>
+<h2 id="2-基于SQuAD语料的阅读理解任务"><a href="#2-基于SQuAD语料的阅读理解任务" class="headerlink" title="(2)基于SQuAD语料的阅读理解任务"></a>(2)基于SQuAD语料的阅读理解任务</h2><p>设置为语料所在文件夹为$SQUAD_DIR</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">python run_squad.py \</span><br><span class="line">  --vocab_file&#x3D;$BERT_BASE_DIR&#x2F;vocab.txt \</span><br><span class="line">  --bert_config_file&#x3D;$BERT_BASE_DIR&#x2F;bert_config.json \</span><br><span class="line">  --init_checkpoint&#x3D;$BERT_BASE_DIR&#x2F;bert_model.ckpt \</span><br><span class="line">  --do_train&#x3D;True \</span><br><span class="line">  --train_file&#x3D;$SQUAD_DIR&#x2F;train-v1.1.json \</span><br><span class="line">  --do_predict&#x3D;True \</span><br><span class="line">  --predict_file&#x3D;$SQUAD_DIR&#x2F;dev-v1.1.json \</span><br><span class="line">  --train_batch_size&#x3D;12 \</span><br><span class="line">  --learning_rate&#x3D;3e-5 \</span><br><span class="line">  --num_train_epochs&#x3D;2.0 \</span><br><span class="line">  --max_seq_length&#x3D;384 \</span><br><span class="line">  --doc_stride&#x3D;128 \</span><br><span class="line">  --output_dir&#x3D;&#x2F;tmp&#x2F;squad_base&#x2F;</span><br></pre></td></tr></table></figure>
+<p>在output_dir文件夹下会输出一个predictions.json文件，执行：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">python3 $SQUAD_DIR&#x2F;evaluate-v1.1.py $SQUAD_DIR&#x2F;dev-v1.1.json predictions.json</span><br></pre></td></tr></table></figure>
+<p>看到以下结果，说明执行无误：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&#123;&quot;f1&quot;: 88.41249612335034, &quot;exact_match&quot;: 81.2488174077578&#125;</span><br></pre></td></tr></table></figure>
+<h1 id="5、总结："><a href="#5、总结：" class="headerlink" title="5、总结："></a>5、总结：</h1><p>本篇内容主要解决了以下两个问题：</p>
+<p>(1) 基于MRPC语料的句子对分类任务和基于SQuAD语料的阅读理解任务的demo执行，主要是翻译源码中README.md的部分内容；</p>
+<p>(2) 对于部分语料无法下载的情况，提供了其他的搜集方式。</p>
+<p>系列后续将对bert源码进行解读，敬请关注</p>
+<p><strong>系列文章</strong></p>
+<p><a href="../BERT系列（二）——源码解读之模型主体">BERT系列（二）——模型主体源码解读</a><br><a href="../BERT系列（三）——源码解读之Pre-train">BERT系列（三）——源码解读之Pre-train</a><br><a href="../BERT系列（四）——源码解读之Fine-tune">BERT系列（四）——源码解读之Fine-tune</a><br><a href="../BERT系列（五）——中文分词实践-F1-97-8-附代码">BERT系列（五）——中文分词实践 F1 97.8%(附代码)</a></p>
+<p><strong>Reference</strong><br>1.<a href="https://github.com/google-research/bert" target="_blank" rel="noopener">https://github.com/google-research/bert</a></p>
+
+      
+    </div>
+    <footer>
+      
+        
+        
+        
+  <div class="addthis addthis_toolbox addthis_default_style">
+    
+      <a class="addthis_button_facebook_like" fb:like:layout="button_count"></a>
+    
+    
+      <a class="addthis_button_tweet"></a>
+    
+    
+      <a class="addthis_button_google_plusone" g:plusone:size="medium"></a>
+    
+    
+      <a class="addthis_button_pinterest_pinit" pi:pinit:layout="horizontal"></a>
+    
+    <a class="addthis_counter addthis_pill_style"></a>
+  </div>
+  <script type="text/javascript" src="//s7.addthis.com/js/300/addthis_widget.js"></script>
+
+      
+      <div class="clearfix"></div>
+    </footer>
+  </div>
+</article>
+
+
+<section id="comment">
+  <h1 class="title">Comments</h1>
+
+  
+      <div id="fb-root"></div>
+<script>
+  (function(d, s, id) {
+    var js, fjs = d.getElementsByTagName(s)[0];
+    if (d.getElementById(id)) return;
+    js = d.createElement(s); js.id = id;
+    js.src = "//connect.facebook.net/en_US/all.js#xfbml=1&appId=123456789012345";
+    fjs.parentNode.insertBefore(js, fjs);
+  }(document, 'script', 'facebook-jssdk'));
+</script>
+
+<div class="fb-comments" data-href="https://jiangpinglei.github.io/BERT%E7%B3%BB%E5%88%97%EF%BC%88%E4%B8%80%EF%BC%89%E2%80%94%E2%80%94demo%E8%BF%90%E8%A1%8C/index.html" data-num-posts="5" data-width="840" data-colorscheme="light"></div>
+      
+  
+</section>
+
+</div></div>
+    <aside id="sidebar" class="alignright">
+  <div class="search">
+  <form action="//google.com/search" method="get" accept-charset="utf-8">
+    <input type="search" name="q" results="0" placeholder="Search">
+    <input type="hidden" name="as_sitesearch" value="jiangpinglei.github.io">
+  </form>
+</div>
+
+
+  
+
+  
+</aside>
+    <div class="clearfix"></div>
+  </div>
+  <footer id="footer" class="inner"><div class="alignleft">
+  
+  &copy; 2020 Jiangping Lei
+  
+</div>
+<div class="clearfix"></div></footer>
+  
+<script src="/js/jquery-3.4.1.min.js"></script>
+
+<script src="/js/jquery.imagesloaded.min.js"></script>
+<script src="/js/gallery.js"></script>
+
+
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+(function($){
+  $('.fancybox').fancybox();
+})(jQuery);
+</script>
+
+</body>
+</html>

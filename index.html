@@ -1,0 +1,413 @@
+<!DOCTYPE HTML>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  
+  <title>西溪雷神</title>
+  <meta name="author" content="Jiangping Lei">
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  
+  <meta property="og:site_name" content="西溪雷神"/>
+
+  
+    <meta property="og:image" content=""/>
+  
+
+  <link href="/favicon.png" rel="icon">
+  <link rel="alternate" href="/atom.xml" title="西溪雷神" type="application/atom+xml">
+  <link rel="stylesheet" href="/css/style.css" media="screen" type="text/css">
+  <!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+  
+
+<meta name="generator" content="Hexo 4.2.0"></head>
+
+
+<body>
+  <header id="header" class="inner"><div class="alignleft">
+  <h1><a href="/">西溪雷神</a></h1>
+  <h2><a href="/"></a></h2>
+</div>
+<nav id="main-nav" class="alignright">
+  <ul>
+    
+      <li><a href="/">Home</a></li>
+    
+      <li><a href="/archives">Archives</a></li>
+    
+  </ul>
+  <div class="clearfix"></div>
+</nav>
+<div class="clearfix"></div>
+</header>
+  <div id="content" class="inner">
+    <div id="main-col" class="alignleft"><div id="wrapper">
+  <article id="post-BERT系列（五）——中文分词实践-F1-97-8-附代码" class="h-entry post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  
+  <div class="post-content">
+    <header>
+      
+        <div class="icon"></div>
+        <time class="dt-published" datetime="2019-01-11T08:59:00.000Z"><a href="/BERT系列（五）——中文分词实践-F1-97-8-附代码/">2019-01-11</a></time>
+      
+      
+  
+    <h1 class="title"><a href="/BERT系列（五）——中文分词实践-F1-97-8-附代码/">BERT系列（五）——中文分词实践 F1 97.8%(附代码)</a></h1>
+  
+
+    </header>
+    <div class="e-content entry" itemprop="articleBody">
+      
+        <h1 id="一、前言"><a href="#一、前言" class="headerlink" title="一、前言"></a>一、前言</h1><p>BERT源码解读完了，具体怎么用于自己的项目呢？在<a href="../BERT系列（四）——源码解读之Fine-tune">BERT系列（四）——源码解读之Fine-tune</a>中，我说只要修改两个地方。</p>
+<blockquote><p>重要的是明白根据不同任务调整输入格式和对loss的构建，这两个知识点学会之后，基本上也可以依葫芦画瓢做一些自己的任务了。</p>
+</blockquote>
+
+<p>那么这一次，我们就来依葫芦画瓢，作一个中文分词项目。</p>
+      
+    </div>
+    <footer>
+      
+        
+          <div class="alignleft">
+            <a href="/BERT系列（五）——中文分词实践-F1-97-8-附代码/#more" class="more-link">Read More</a>
+          </div>
+        
+        
+      
+      <div class="clearfix"></div>
+    </footer>
+  </div>
+</article>
+
+
+
+
+  <article id="post-BERT系列（四）——源码解读之Fine-tune" class="h-entry post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  
+  <div class="post-content">
+    <header>
+      
+        <div class="icon"></div>
+        <time class="dt-published" datetime="2018-12-26T10:30:57.000Z"><a href="/BERT系列（四）——源码解读之Fine-tune/">2018-12-26</a></time>
+      
+      
+  
+    <h1 class="title"><a href="/BERT系列（四）——源码解读之Fine-tune/">BERT系列（四）——源码解读之Fine-tune</a></h1>
+  
+
+    </header>
+    <div class="e-content entry" itemprop="articleBody">
+      
+        <p>这是我们源码解读的最后一个部分了。fine-tune搞明白之后推断也就没必要再分析了，反正形式都是一样的，重要的是明白根据不同任务调整输入格式和对loss的构建，这两个知识点学会之后，基本上也可以依葫芦画瓢做一些自己的任务了。</p>
+<p>bert官方给了两个任务的fine-tune代码:</p>
+<p>1.<a href="https://github.com/google-research/bert/blob/master/run_classifier.py" target="_blank" rel="noopener">run_classifier.py</a></p>
+<p>2.<a href="https://github.com/google-research/bert/blob/master/run_squad.py" target="_blank" rel="noopener">run_squad.py</a></p>
+<p>其实就是我们在<a href="../BERT系列（一）——demo运行">BERT系列（一）——demo运行</a>里运行的demo，下面我就对这两个代码进行展开说明：</p>
+      
+    </div>
+    <footer>
+      
+        
+          <div class="alignleft">
+            <a href="/BERT系列（四）——源码解读之Fine-tune/#more" class="more-link">Read More</a>
+          </div>
+        
+        
+      
+      <div class="clearfix"></div>
+    </footer>
+  </div>
+</article>
+
+
+
+
+  <article id="post-BERT系列（三）——源码解读之Pre-train" class="h-entry post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  
+  <div class="post-content">
+    <header>
+      
+        <div class="icon"></div>
+        <time class="dt-published" datetime="2018-12-25T09:58:24.000Z"><a href="/BERT系列（三）——源码解读之Pre-train/">2018-12-25</a></time>
+      
+      
+  
+    <h1 class="title"><a href="/BERT系列（三）——源码解读之Pre-train/">BERT系列（三）——源码解读之Pre-train</a></h1>
+  
+
+    </header>
+    <div class="e-content entry" itemprop="articleBody">
+      
+        <p>pre-train是迁移学习的基础，虽然Google已经发布了各种预训练好的模型，而且因为资源消耗巨大，自己再预训练也不现实（在Google Cloud TPU v2 上训练BERT-Base要花费近500刀，耗时达到两周。在GPU上可想而知只会更贵），但是学习bert的预训练方法可以为我们弄懂整个bert的运行流程提供莫大的帮助。预训练涉及到的模块有点多，所以这也将会是一篇长文，在能简略的地方我尽量简略，还是那句话，我的文章只能是起到一个导读的作用，如果想摸清里面的各种细节还是要自己把源码过一遍的。</p>
+<p>pre-train涉及到的模块分为以下三个，我将为大家一一介绍：</p>
+<ol>
+<li><p><a href="https://github.com/google-research/bert/blob/master/tokenization.py" target="_blank" rel="noopener" title="tokenization.py">tokenization.py</a></p>
+</li>
+<li><p><a href="https://github.com/google-research/bert/blob/master/create_pretraining_data.py" target="_blank" rel="noopener" title="create_pretraining_data.py">create_pretraining_data.py</a></p>
+</li>
+<li><p><a href="https://github.com/google-research/bert/blob/master/run_pretraining.py" target="_blank" rel="noopener" title="run_pretraining.py">run_pretraining.py</a></p>
+</li>
+</ol>
+<p>其中tokenization是对原始句子内容的解析，分为BasicTokenizer和WordpieceTokenizer两个，不只是在预训练中，在fine-tune和推断过程同样要用到它；create_pretraining_data顾名思义就是将原始语料转换成适合模型预训练的输入数据；run_pretraining就是预训练的执行代码了。</p>
+      
+    </div>
+    <footer>
+      
+        
+          <div class="alignleft">
+            <a href="/BERT系列（三）——源码解读之Pre-train/#more" class="more-link">Read More</a>
+          </div>
+        
+        
+      
+      <div class="clearfix"></div>
+    </footer>
+  </div>
+</article>
+
+
+
+
+  <article id="post-BERT系列（二）——源码解读之模型主体" class="h-entry post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  
+  <div class="post-content">
+    <header>
+      
+        <div class="icon"></div>
+        <time class="dt-published" datetime="2018-12-19T08:08:07.000Z"><a href="/BERT系列（二）——源码解读之模型主体/">2018-12-19</a></time>
+      
+      
+  
+    <h1 class="title"><a href="/BERT系列（二）——源码解读之模型主体/">BERT系列（二）——源码解读之模型主体</a></h1>
+  
+
+    </header>
+    <div class="e-content entry" itemprop="articleBody">
+      
+        <p>本篇文章主要是解读模型主体代码<a href="https://github.com/google-research/bert/blob/master/modeling.py" target="_blank" rel="noopener">modeling.py</a>。在阅读这篇文章之前希望读者们对bert的相关理论有一定的了解，尤其是transformer的结构原理，网上的资料很多，本文内容对原理部分就不做过多的介绍了。</p>
+<p>我自己写出来其中一个目的也是帮助自己学习整理、当你输出的时候才也会明白哪里懂了哪里不懂。因为水平有限，很多地方理解不到位的，还请各位批评指正。</p>
+      
+    </div>
+    <footer>
+      
+        
+          <div class="alignleft">
+            <a href="/BERT系列（二）——源码解读之模型主体/#more" class="more-link">Read More</a>
+          </div>
+        
+        
+      
+      <div class="clearfix"></div>
+    </footer>
+  </div>
+</article>
+
+
+
+
+  <article id="post-BERT系列（一）——demo运行" class="h-entry post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  
+  <div class="post-content">
+    <header>
+      
+        <div class="icon"></div>
+        <time class="dt-published" datetime="2018-12-18T05:06:26.000Z"><a href="/BERT系列（一）——demo运行/">2018-12-18</a></time>
+      
+      
+  
+    <h1 class="title"><a href="/BERT系列（一）——demo运行/">BERT系列（一）——demo运行</a></h1>
+  
+
+    </header>
+    <div class="e-content entry" itemprop="articleBody">
+      
+        <p>谷歌推出的Bert，最近有多火，估计做自然语言处理的都知道。据称在SQuAD等11项任务当中达到了state of the art。bert的原理可参考<a href="https://arxiv.org/abs/1810.04805" target="_blank" rel="noopener">论文</a>，或者网上其他人翻译的资料。谷歌已经在github上<a href="https://github.com/google-research/bert" target="_blank" rel="noopener">开源了代码</a>，相信每一个从事NLP的都应该和我一样摩拳擦掌，迫不及待地想要学习它了吧。</p>
+<p>就我个人而言学习一个开源项目，第一步是安装，第二步是跑下demo，第三步才是阅读源码。安装bert简单，直接github上拉下来就可以了，跑demo其实也不难，参照README.md一步步操作就行了，但是经我实操过后，发现里面有个小坑，所以用这篇文章记录下来，供读者参考。</p>
+<p>闲言少叙，书归正传。本次介绍的demo只有两个，一个是基于MRPC(Microsoft Research Paraphrase Corpus )的句子对分类任务，一个是基于SQuAD语料的阅读理解任务。run demo分为以下几步：</p>
+      
+    </div>
+    <footer>
+      
+        
+          <div class="alignleft">
+            <a href="/BERT系列（一）——demo运行/#more" class="more-link">Read More</a>
+          </div>
+        
+        
+      
+      <div class="clearfix"></div>
+    </footer>
+  </div>
+</article>
+
+
+
+
+  <article id="post-同一宿主机下不同docker之间的通信" class="h-entry post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  
+  <div class="post-content">
+    <header>
+      
+        <div class="icon"></div>
+        <time class="dt-published" datetime="2018-11-27T07:08:59.000Z"><a href="/同一宿主机下不同docker之间的通信/">2018-11-27</a></time>
+      
+      
+  
+    <h1 class="title"><a href="/同一宿主机下不同docker之间的通信/">同一宿主机下不同docker之间的通信</a></h1>
+  
+
+    </header>
+    <div class="e-content entry" itemprop="articleBody">
+      
+        <p>在同一台宿主机下部署了两个docker，其中一个docker 容器会访问另一个docker 容器提供的的服务。</p>
+<p>被访问者docker容器名cnn_model</p>
+<p>启动：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo docker run -p 8503:8501 --name cnn_model --mount type&#x3D;bind,source&#x3D;&#x2F;4T&#x2F;home&#x2F;experiment&#x2F;model&#x2F;cnn_model,target&#x3D;&#x2F;models&#x2F;cnn_model -e MODEL_NAME&#x3D;cnn_model -t tensorflow&#x2F;serving &amp;</span><br></pre></td></tr></table></figure>
+<p>被访问接口：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">http:&#x2F;&#x2F;localhost:8503&#x2F;v1&#x2F;models&#x2F;cnn_model:predict</span><br></pre></td></tr></table></figure>
+<p>访问者docker容器名test</p>
+<p>启动：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo docker run -p 3940:3940 --name mytest  -d mytest:latest</span><br></pre></td></tr></table></figure>
+
+<p>最开始我想当然的认为既然在同一宿主机下，ip肯定是localhost，可是当我request的时候，却报错了</p>
+      
+    </div>
+    <footer>
+      
+        
+          <div class="alignleft">
+            <a href="/同一宿主机下不同docker之间的通信/#more" class="more-link">Read More</a>
+          </div>
+        
+        
+      
+      <div class="clearfix"></div>
+    </footer>
+  </div>
+</article>
+
+
+
+
+  <article id="post-Tensorflow-Serving-Docker-RESTful-API客户端访问问题排查" class="h-entry post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  
+  <div class="post-content">
+    <header>
+      
+        <div class="icon"></div>
+        <time class="dt-published" datetime="2018-11-23T09:14:57.000Z"><a href="/Tensorflow-Serving-Docker-RESTful-API客户端访问问题排查/">2018-11-23</a></time>
+      
+      
+  
+    <h1 class="title"><a href="/Tensorflow-Serving-Docker-RESTful-API客户端访问问题排查/">Tensorflow Serving-Docker RESTful API客户端访问问题排查</a></h1>
+  
+
+    </header>
+    <div class="e-content entry" itemprop="articleBody">
+      
+        <p>tensorflow模型的deploy有多种方法，tensorflow serving是一款面向tensorflow模型对外提供服务的web容器，部署之后只需要更新指定位置的模型文件即可实现模型的在线替换，非常适合生产环境下的运行。</p>
+<p>网上此类教程不多，但还是能搜到一些，我参考的是这位仁兄的：<br><a href="https://blog.csdn.net/u011734144/article/details/82107610?utm_source=oschina-app" target="_blank" rel="noopener">https://blog.csdn.net/u011734144/article/details/82107610?utm_source=oschina-app</a></p>
+      
+    </div>
+    <footer>
+      
+        
+          <div class="alignleft">
+            <a href="/Tensorflow-Serving-Docker-RESTful-API客户端访问问题排查/#more" class="more-link">Read More</a>
+          </div>
+        
+        
+      
+      <div class="clearfix"></div>
+    </footer>
+  </div>
+</article>
+
+
+
+
+  <article id="post-Tensorflow-多核GPU编程问题排查" class="h-entry post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  
+  <div class="post-content">
+    <header>
+      
+        <div class="icon"></div>
+        <time class="dt-published" datetime="2018-11-12T10:32:38.000Z"><a href="/Tensorflow-多核GPU编程问题排查/">2018-11-12</a></time>
+      
+      
+  
+    <h1 class="title"><a href="/Tensorflow-多核GPU编程问题排查/">Tensorflow 多核GPU编程问题排查</a></h1>
+  
+
+    </header>
+    <div class="e-content entry" itemprop="articleBody">
+      
+        <p>很久没有动tensorflow了，最近实验做个分词的工具（这不是重点），以前都是在单个gpu上面运行，突然想尝试在多核GPU下跑一跑。</p>
+<p>在网上随便找了篇帖子：<a href="https://blog.csdn.net/winycg/article/details/79759294参照着改一改，代码如下：" target="_blank" rel="noopener">https://blog.csdn.net/winycg/article/details/79759294参照着改一改，代码如下：</a></p>
+      
+    </div>
+    <footer>
+      
+        
+          <div class="alignleft">
+            <a href="/Tensorflow-多核GPU编程问题排查/#more" class="more-link">Read More</a>
+          </div>
+        
+        
+      
+      <div class="clearfix"></div>
+    </footer>
+  </div>
+</article>
+
+
+
+
+
+<nav id="pagination">
+  
+  
+  <div class="clearfix"></div>
+</nav></div></div>
+    <aside id="sidebar" class="alignright">
+  <div class="search">
+  <form action="//google.com/search" method="get" accept-charset="utf-8">
+    <input type="search" name="q" results="0" placeholder="Search">
+    <input type="hidden" name="as_sitesearch" value="jiangpinglei.github.io">
+  </form>
+</div>
+
+
+  
+
+  
+</aside>
+    <div class="clearfix"></div>
+  </div>
+  <footer id="footer" class="inner"><div class="alignleft">
+  
+  &copy; 2020 Jiangping Lei
+  
+</div>
+<div class="clearfix"></div></footer>
+  
+<script src="/js/jquery-3.4.1.min.js"></script>
+
+<script src="/js/jquery.imagesloaded.min.js"></script>
+<script src="/js/gallery.js"></script>
+
+
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+(function($){
+  $('.fancybox').fancybox();
+})(jQuery);
+</script>
+
+</body>
+</html>

@@ -1,0 +1,202 @@
+<!DOCTYPE HTML>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  
+  <title>Tensorflow Serving-Docker RESTful API客户端访问问题排查 | 西溪雷神</title>
+  <meta name="author" content="Jiangping Lei">
+  
+  <meta name="description" content="tensorflow模型的deploy有多种方法，tensorflow serving是一款面向tensorflow模型对外提供服务的web容器，部署之后只需要更新指定位置的模型文件即可实现模型的在线替换，非常适合生产环境下的运行。
+网上此类教程不多，但还是能搜到一些，我参考的是这位仁兄的：https://blog.csdn.net/u011734144/article/details/82107610?utm_source=oschina-app">
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  <meta property="og:title" content="Tensorflow Serving-Docker RESTful API客户端访问问题排查"/>
+  <meta property="og:site_name" content="西溪雷神"/>
+
+  
+    <meta property="og:image" content=""/>
+  
+
+  <link href="/favicon.png" rel="icon">
+  <link rel="alternate" href="/atom.xml" title="西溪雷神" type="application/atom+xml">
+  <link rel="stylesheet" href="/css/style.css" media="screen" type="text/css">
+  <!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+  
+
+<meta name="generator" content="Hexo 4.2.0"></head>
+
+
+<body>
+  <header id="header" class="inner"><div class="alignleft">
+  <h1><a href="/">西溪雷神</a></h1>
+  <h2><a href="/"></a></h2>
+</div>
+<nav id="main-nav" class="alignright">
+  <ul>
+    
+      <li><a href="/">Home</a></li>
+    
+      <li><a href="/archives">Archives</a></li>
+    
+  </ul>
+  <div class="clearfix"></div>
+</nav>
+<div class="clearfix"></div>
+</header>
+  <div id="content" class="inner">
+    <div id="main-col" class="alignleft"><div id="wrapper"><article id="post-Tensorflow-Serving-Docker-RESTful-API客户端访问问题排查" class="h-entry post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  
+  <div class="post-content">
+    <header>
+      
+        <div class="icon"></div>
+        <time class="dt-published" datetime="2018-11-23T09:14:57.000Z"><a href="/Tensorflow-Serving-Docker-RESTful-API客户端访问问题排查/">2018-11-23</a></time>
+      
+      
+  
+    <h1 class="p-name title" itemprop="headline name">Tensorflow Serving-Docker RESTful API客户端访问问题排查</h1>
+  
+
+    </header>
+    <div class="e-content entry" itemprop="articleBody">
+      
+        <p>tensorflow模型的deploy有多种方法，tensorflow serving是一款面向tensorflow模型对外提供服务的web容器，部署之后只需要更新指定位置的模型文件即可实现模型的在线替换，非常适合生产环境下的运行。</p>
+<p>网上此类教程不多，但还是能搜到一些，我参考的是这位仁兄的：<br><a href="https://blog.csdn.net/u011734144/article/details/82107610?utm_source=oschina-app" target="_blank" rel="noopener">https://blog.csdn.net/u011734144/article/details/82107610?utm_source=oschina-app</a></p>
+<a id="more"></a>
+
+<h1 id="一、问题的提出"><a href="#一、问题的提出" class="headerlink" title="一、问题的提出"></a>一、问题的提出</h1><p>安装好了，之后找了些例子跑了下，没什么问题。可是当我用自己的模型进行预测的时候，却报错了：</p>
+<h2 id="1-当预测样本为1的时候，返回为0："><a href="#1-当预测样本为1的时候，返回为0：" class="headerlink" title="(1) 当预测样本为1的时候，返回为0："></a>(1) 当预测样本为1的时候，返回为0：</h2><p>客户端代码：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">p_data0 &#x3D; &#123;&quot;input_x&quot;: input_x[0], &#39;keep_prob&#39;: 1.0&#125;</span><br><span class="line">param &#x3D; &#123;</span><br><span class="line">    &quot;signature_name&quot;:signature_key,</span><br><span class="line">    &quot;instances&quot;: [p_data0]</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>返回结果：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">    &quot;predictions&quot;: [[0.0, 0.0, 0.0]]</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h1 id="2-当预测样本为多个的时候，直接报错："><a href="#2-当预测样本为多个的时候，直接报错：" class="headerlink" title="(2) 当预测样本为多个的时候，直接报错："></a>(2) 当预测样本为多个的时候，直接报错：</h1><p>客户端代码：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">p_data0 &#x3D; &#123;&quot;input_x&quot;: input_x[0], &#39;keep_prob&#39;: 1.0&#125;</span><br><span class="line">p_data1 &#x3D; &#123;&quot;input_x&quot;: input_x[1], &#39;keep_prob&#39;: 1.0&#125;</span><br><span class="line">param &#x3D; &#123;</span><br><span class="line">    &quot;signature_name&quot;:signature_key,</span><br><span class="line">    &quot;instances&quot;: [p_data0, p_data1]</span><br><span class="line"> &#125;</span><br></pre></td></tr></table></figure>
+<p>返回错误：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&#123; &quot;error&quot;: &quot;Incompatible shapes: [2,1024] vs...&quot;&#125;</span><br></pre></td></tr></table></figure>
+
+<h1 id="二、问题排查"><a href="#二、问题排查" class="headerlink" title="二、问题排查"></a>二、问题排查</h1><h2 id="1、解决单个预测结果为0的问题"><a href="#1、解决单个预测结果为0的问题" class="headerlink" title="1、解决单个预测结果为0的问题"></a>1、解决单个预测结果为0的问题</h2><p>在请教了@小浩之后，才知道问题原来出在batch_norm上。之前是根据公式写的代码，如果只有一个样本，那么样本等于其均值，output就为0了<br><img src="https://upload-images.jianshu.io/upload_images/14927967-7d5f4f24de36057a.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="batch norm "></p>
+<p>详细解答可以参考：<a href="https://stackoverflow.com/questions/48320854/tensorflow-and-batch-normalization-with-batch-size-1-outputs-all-zeros?rq=1" target="_blank" rel="noopener">https://stackoverflow.com/questions/48320854/tensorflow-and-batch-normalization-with-batch-size-1-outputs-all-zeros?rq=1</a></p>
+<p>后面改正只需要把batch内样本求mean和var的公式改为总体样本的滑动方式就可以了，预测的时候使用训练集总体滑动的mean以及var。</p>
+<p>在线下将pb模型加载运行一遍，发现这个问题得到了解决。</p>
+<h2 id="2、解决批量预测出现问题"><a href="#2、解决批量预测出现问题" class="headerlink" title="2、解决批量预测出现问题"></a>2、解决批量预测出现问题</h2><p>但是当我把修改代码训练后的模型加载到tensorflow serving、进行客户端访问时，却发现连单个样本的访问也无法成功了。</p>
+<p>客户端代码：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">p_data0 &#x3D; &#123;&quot;input_x&quot;: input_x[0], &#39;keep_prob&#39;: 1.0, &#39;is_train&#39;: False&#125;</span><br><span class="line">param &#x3D; &#123;</span><br><span class="line">    &quot;signature_name&quot;:signature_key,</span><br><span class="line">    &quot;instances&quot;: [p_data0]</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>报错：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&#123; &quot;error&quot;: &quot;The second input must be a scalar, but it has shape [1]...&quot;&#125;</span><br></pre></td></tr></table></figure>
+
+<p><strong>批量访问的错误也发生了变化</strong></p>
+<p>客户端代码：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">p_data0 &#x3D; &#123;&quot;input_x&quot;: input_x[0], &#39;keep_prob&#39;: 1.0, &#39;is_train&#39;: False&#125;</span><br><span class="line">p_data1 &#x3D; &#123;&quot;input_x&quot;: input_x[1], &#39;keep_prob&#39;: 1.0, &#39;is_train&#39;: False&#125;</span><br><span class="line">param &#x3D; &#123;</span><br><span class="line">    &quot;signature_name&quot;:signature_key,</span><br><span class="line">    &quot;instances&quot;: [p_data0, p_data1]</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>报错：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&#123; &quot;error&quot;: &quot;The second input must be a scalar, but it has shape [2]...&quot;&#125;</span><br></pre></td></tr></table></figure>
+<p>跟上一次唯一的不同，只是增加了一个is_train的placeholder，发生这样的错误感觉很匪夷所思。</p>
+<p>后来我在参考的那篇文章里面看到，作者之所以这样写客户端的请求代码，是参考了tensorflow/serving里面json_tensor.h这个文件，于是我也去github上面把这个文件读了一下，里面有这么一段话。</p>
+<blockquote>
+<p>// “instances” is used to format input tensors in “row” format and “inputs”<br>// is used to format them in “columnar” format. The former is easy to read<br>// but requires all inputs to have same 0-th dimension whereas the latter<br>// can represent input tensors with varying sizes.</p>
+</blockquote>
+<p>使用”instances”作为参数传入的时候要求所有的输入具有相同的0维，反之”inputs”可以输入具有不同大小的张量，说实话不太懂，什么是具有相同的0维，”instances”列表里的元素还是单个元素里面各个不同的参数？又看了下”inputs”的使用方法：</p>
+<blockquote>
+<p>// {<br>//   “inputs”: {<br>//     “tag”: [“foo”, “bar”],<br>//     “signal”: [1, 2, 3, 4, 5, 3, 4, 1, 2, 4],<br>//     “sensor”: [[1, 2], [3, 4], [4, 5], [6, 8]]<br>//   }<br>// }</p>
+</blockquote>
+<p>貌似更符合输入习惯，于是我抱着试一试的心态改了下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">p_data0 &#x3D; &#123;&quot;input_x&quot;: input_x[0:1], &#39;keep_prob&#39;: 1.0, &#39;is_train&#39;: False&#125;</span><br><span class="line">param &#x3D; &#123;</span><br><span class="line">    &quot;signature_name&quot;: signature_key,</span><br><span class="line">    &quot;inputs&quot;: p_data0</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这下没问题了！上面是单个样本的预测，多个样本的话直接”input_x”: input_x[0:n]就可以了。</p>
+<p>事实上我用到的只是predict API，RESTful API 还有classify API和regress API，它们两者的API很像，但与predict API不同。</p>
+<p>除了RESTful API 之外tensorflow serving主打的gRPC API好像才是亮点，这个以后再继续尝试吧。</p>
+<h1 id="三、总结"><a href="#三、总结" class="headerlink" title="三、总结"></a>三、总结</h1><p>（1) 对于tensorflow serving-docker的安装、以及基础用法参考最上面那个文章就可以了，写的还是蛮清晰的；<br>（2）如果进行单个模型预测（不局限于tensorflow serving）返回的结果为0，那么多半是batch norm的问题, 这类问题很常见，网上的资料已经很多了。<br>（3）如果在客户端请求tensorflow serving接口时，发生返回错误，基本上是参数传入的问题。</p>
+<p>后面在这里找到一篇翻译，关于客户端请求参数的介绍，写得挺好的：<br><a href="https://www.jianshu.com/p/a9dbf1e63c88?utm_source=oschina-app" target="_blank" rel="noopener">https://www.jianshu.com/p/a9dbf1e63c88?utm_source=oschina-app</a></p>
+
+      
+    </div>
+    <footer>
+      
+        
+        
+        
+  <div class="addthis addthis_toolbox addthis_default_style">
+    
+      <a class="addthis_button_facebook_like" fb:like:layout="button_count"></a>
+    
+    
+      <a class="addthis_button_tweet"></a>
+    
+    
+      <a class="addthis_button_google_plusone" g:plusone:size="medium"></a>
+    
+    
+      <a class="addthis_button_pinterest_pinit" pi:pinit:layout="horizontal"></a>
+    
+    <a class="addthis_counter addthis_pill_style"></a>
+  </div>
+  <script type="text/javascript" src="//s7.addthis.com/js/300/addthis_widget.js"></script>
+
+      
+      <div class="clearfix"></div>
+    </footer>
+  </div>
+</article>
+
+
+<section id="comment">
+  <h1 class="title">Comments</h1>
+
+  
+      <div id="fb-root"></div>
+<script>
+  (function(d, s, id) {
+    var js, fjs = d.getElementsByTagName(s)[0];
+    if (d.getElementById(id)) return;
+    js = d.createElement(s); js.id = id;
+    js.src = "//connect.facebook.net/en_US/all.js#xfbml=1&appId=123456789012345";
+    fjs.parentNode.insertBefore(js, fjs);
+  }(document, 'script', 'facebook-jssdk'));
+</script>
+
+<div class="fb-comments" data-href="https://jiangpinglei.github.io/Tensorflow-Serving-Docker-RESTful-API%E5%AE%A2%E6%88%B7%E7%AB%AF%E8%AE%BF%E9%97%AE%E9%97%AE%E9%A2%98%E6%8E%92%E6%9F%A5/index.html" data-num-posts="5" data-width="840" data-colorscheme="light"></div>
+      
+  
+</section>
+
+</div></div>
+    <aside id="sidebar" class="alignright">
+  <div class="search">
+  <form action="//google.com/search" method="get" accept-charset="utf-8">
+    <input type="search" name="q" results="0" placeholder="Search">
+    <input type="hidden" name="as_sitesearch" value="jiangpinglei.github.io">
+  </form>
+</div>
+
+
+  
+
+  
+</aside>
+    <div class="clearfix"></div>
+  </div>
+  <footer id="footer" class="inner"><div class="alignleft">
+  
+  &copy; 2020 Jiangping Lei
+  
+</div>
+<div class="clearfix"></div></footer>
+  
+<script src="/js/jquery-3.4.1.min.js"></script>
+
+<script src="/js/jquery.imagesloaded.min.js"></script>
+<script src="/js/gallery.js"></script>
+
+
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+(function($){
+  $('.fancybox').fancybox();
+})(jQuery);
+</script>
+
+</body>
+</html>
